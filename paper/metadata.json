@@ -1,0 +1,8 @@
+{
+  "_comment": "Submission metadata for main.tex. Fill the empty fields, then run: python scripts/set_metadata.py --build. Leaving a field empty leaves that placeholder untouched in the PDF. repo_url/doi/orcid are rendered as clickable links; affiliation/date are plain text.",
+  "affiliation": "Birla Institute of Technology and Science, Pilani, India",
+  "date": "November 2026",
+  "orcid": "https://orcid.org/0009-0000-9506-0628",
+  "repo_url": "https://github.com/Raahul-Thakur/optimal-portfolio-rebalancing",
+  "doi": ""
+}

@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# LaTeX build products (main.pdf is committed deliberately -- see below)
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+
+# Machine-dependent, deliberately excluded from the reproducibility guarantee
+results/tables/timings.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local Claude Code session config (machine-specific, not part of the deliverable)
+.claude/
+
+# NOTE: results/figures, results/tables and results/checkpoints ARE committed.
+# They are byte-reproducible from `python scripts/run_all.py`, and committing
+# them lets the paper compile and the reproducibility test diff against a
+# known-good baseline without a prior run.
+
+# MiKTeX drops an empty log directory in the working directory
+latest_logs/

@@ -1,0 +1,11 @@
+# Minimum supported versions.  For the exact environment the committed results
+# were produced in, see requirements-lock.txt.
+numpy>=1.24
+scipy>=1.10
+pandas>=1.5
+matplotlib>=3.6
+torch>=2.0
+jupyter>=1.0
+nbformat>=5.7
+nbclient>=0.7
+pytest>=7.0

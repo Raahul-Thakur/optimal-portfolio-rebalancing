@@ -1,0 +1,29 @@
+{
+  "n_seeds": 10,
+  "repair_delta": 0.05,
+  "seeds": {
+    "residual_min": 0.009200422410611751,
+    "residual_max": 0.013735820474448032,
+    "residual_mean": 0.01097136068564874,
+    "turnover_min": 0.1931716866330372,
+    "turnover_max": 0.32525440819433155,
+    "turnover_mean": 0.2356115854876364,
+    "turnover_std": 0.038566036993367726,
+    "ce_min": 1.024366335761593,
+    "ce_max": 1.0266214378439145,
+    "ce_dp": 1.0292721504785922,
+    "n_underperforming_dp": 10,
+    "gap_closed_min": 1.0000251050067275,
+    "gap_closed_mean": 1.000044752637927
+  },
+  "architectures": {
+    "residual_min": 0.007509401550999395,
+    "residual_max": 0.016617627232163045,
+    "turnover_min": 0.18063724843104964,
+    "turnover_max": 0.2749860605338676,
+    "n_underperforming_dp": 7,
+    "n_architectures": 7,
+    "params_min": 337,
+    "params_max": 66817
+  }
+}

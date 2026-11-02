@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this software or its results, please cite it as below."
+title: "A Variational Control Framework for Optimal Portfolio Rebalancing Under Transaction Costs"
+abstract: >-
+  A reproducible discrete-time dynamic-programming study of portfolio
+  rebalancing under proportional transaction costs. Exploiting CRRA
+  homogeneity the value function reduces to one dimension; backward induction
+  recovers the classical no-trade region and its comparative statics. A small
+  neural network trained to imitate the optimal policy attains low
+  action-space error yet is the worst performer economically, because a smooth
+  regressor cannot represent the no-trade region and therefore over-trades.
+authors:
+  - family-names: Thakur
+    given-names: Rahul
+    email: raahul.thakurr01@gmail.com
+    affiliation: "Birla Institute of Technology and Science, Pilani, India"
+    orcid: "https://orcid.org/0009-0000-9506-0628"
+repository-code: "https://github.com/Raahul-Thakur/optimal-portfolio-rebalancing"
+url: "https://github.com/Raahul-Thakur/optimal-portfolio-rebalancing"
+version: 1.0.0
+date-released: "2026-11-02"
+license: MIT
+keywords:
+  - portfolio rebalancing
+  - transaction costs
+  - no-trade region
+  - stochastic control
+  - dynamic programming
+  - imitation learning
+  - reproducible research

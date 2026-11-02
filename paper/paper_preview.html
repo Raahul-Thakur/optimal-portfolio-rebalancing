@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>A Variational Control Framework for Optimal Portfolio Rebalancing Under Transaction Costs</title>
+<script>
+  window.MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]'],['$$','$$']] } };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+  :root { --ink:#1a1a1a; --muted:#666; --rule:#ddd; --accent:#0072B2; }
+  body { font-family: Georgia, 'Times New Roman', serif; color: var(--ink);
+         max-width: 820px; margin: 0 auto; padding: 2.5rem 1.2rem 5rem;
+         line-height: 1.6; font-size: 18px; }
+  h1 { font-size: 1.7rem; line-height: 1.25; text-align: center; margin-bottom: .3rem; }
+  .sub { text-align:center; color: var(--muted); font-style: italic; margin-bottom: 2rem; }
+  h2 { font-size: 1.3rem; margin-top: 2.4rem; border-bottom: 2px solid var(--accent);
+       padding-bottom: .2rem; }
+  h3 { font-size: 1.08rem; margin-top: 1.6rem; color:#222; }
+  .abstract { background:#f7f9fb; border:1px solid var(--rule); border-radius:8px;
+              padding: 1rem 1.3rem; font-size: .96rem; }
+  .abstract h2 { border:0; margin:0 0 .4rem; font-size:1.05rem; }
+  figure { margin: 1.6rem 0; text-align:center; }
+  figure img { max-width: 100%; border:1px solid var(--rule); border-radius:6px; }
+  figcaption { color: var(--muted); font-size: .85rem; margin-top: .5rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .85rem; margin: 1.2rem 0;
+          font-family: 'Segoe UI', Arial, sans-serif; }
+  th, td { padding: .4rem .6rem; text-align: center; border-bottom: 1px solid var(--rule); }
+  thead th { border-top: 2px solid var(--ink); border-bottom: 1.5px solid var(--ink); }
+  tbody tr:last-child td { border-bottom: 2px solid var(--ink); }
+  td.l, th.l { text-align: left; }
+  .caption { font-size:.82rem; color:var(--muted); font-family:'Segoe UI',Arial,sans-serif;
+             margin-bottom:.2rem; }
+  .prop { background:#fbfbf6; border-left:4px solid var(--accent); padding:.7rem 1rem;
+          margin:1rem 0; }
+  .note { color: var(--muted); font-size:.8rem; text-align:center; margin-top:3rem;
+          border-top:1px solid var(--rule); padding-top:1rem; }
+  code { background:#f2f2f2; padding:1px 4px; border-radius:3px; font-size:.85em; }
+  ol li, ul li { margin: .3rem 0; }
+</style>
+</head>
+<body>
+
+<h1>A Variational Control Framework for Optimal Portfolio Rebalancing Under Transaction Costs</h1>
+<div class="sub">Rahul Thakur &middot; Independent Researcher &middot; August 2026<br/>
+<span style="font-size:.85rem">Browser preview of <code>main.tex</code>. For the typeset version see <code>paper/main.pdf</code>. Equations render via MathJax (needs internet); figures load from <code>../results/figures/</code>.</span></div>
+
+<div class="abstract">
+<h2>Abstract</h2>
+<p>We study portfolio rebalancing between one risky and one risk-free asset as a
+finite-horizon stochastic control problem with proportional transaction costs and
+constant-relative-risk-aversion (CRRA) preferences. Exploiting the homogeneity of CRRA
+utility we reduce the value function to a one-dimensional object in the risky-allocation
+fraction and solve the Bellman recursion exactly (to quadrature and grid resolution) by
+backward induction. The solution reproduces the classical <em>no-trade region</em>: a band
+of allocations around the frictionless Merton target inside which it is optimal not to
+trade, and toward whose boundary the investor trades when outside. We confirm the textbook
+comparative statics &mdash; the band widens with the transaction-cost rate (consistent with
+the small-cost \(tc^{1/3}\) scaling) and narrows with risk aversion &mdash; and the horizon
+effect by which the band flares open near the terminal date.</p>
+<p>We then ask a computational question: can a lightweight neural network imitate this
+optimal control? Training a 4,417-parameter multilayer perceptron by supervised regression
+on the dynamic-programming policy attains a validation mean-squared error of
+\(2.1\times10^{-4}\), yet a paired Monte-Carlo evaluation (common random numbers, 20,000
+paths) shows the learned policy is the <em>worst</em> performer by certainty equivalent. The
+mechanism is structural: a smooth regressor cannot represent the exact &ldquo;do
+nothing&rdquo; identity on a positive-measure set, so its tiny action-space errors inside
+the no-trade region are amplified into continuous spurious turnover (mean turnover 0.21
+versus \(3\times10^{-5}\) for the optimal policy). We conclude that imitating optimal
+<em>control</em> requires respecting the inaction region, not merely minimizing action-space
+error.</p>
+</div>
+
+<h2>1. Introduction</h2>
+<h3>1.1 Motivation</h3>
+<p>A long-only investor who wants to hold a fixed fraction of wealth in a risky asset faces
+a basic tension. Random returns continuously perturb the realized allocation away from the
+target, but every corrective trade costs money. In a frictionless world the resolution is
+trivial: rebalance continuously to the Merton (1969) target. With transaction costs,
+continuous rebalancing is infinitely expensive, and the optimal policy instead tolerates
+deviations, trading only when the allocation drifts too far. Characterizing &ldquo;too
+far&rdquo; is the heart of the problem.</p>
+<h3>1.2 Transaction costs and rebalancing</h3>
+<p>Proportional transaction costs transform the single optimal allocation point into an
+interval of inaction &mdash; the <em>no-trade region</em>. This qualitative feature, first
+identified by Magill &amp; Constantinides (1976) and rigorously established by Constantinides
+(1986), Davis &amp; Norman (1990) and Shreve &amp; Soner (1994), is robust across model
+specifications and is the single most important practical consequence of trading frictions.</p>
+<h3>1.3 Research questions</h3>
+<ul>
+<li><b>Q1.</b> Does a transparent discrete-time dynamic program recover the classical
+no-trade region and its comparative statics?</li>
+<li><b>Q2.</b> Can a small neural network, trained by supervised imitation of the optimal
+policy, serve as a fast approximate controller?</li>
+<li><b>Q3.</b> How do the optimal policy, its learned approximation, and simple heuristics
+(periodic rebalancing, buy-and-hold) compare on economic performance, turnover, and cost?</li>
+</ul>
+<p>Contributions: (i) a clean, fully reproducible discrete-time solver that exploits CRRA
+homogeneity for a one-dimensional state; (ii) a closed-form proportional-cost wealth-update
+identity that makes the recursion exact and vectorizable; and (iii) the finding that naive
+action-space imitation <em>systematically fails</em> by violating the no-trade region, with a
+mechanistic explanation and statistically rigorous paired evidence.</p>
+
+<h2>2. Literature Review</h2>
+<p><b>Portfolio optimization.</b> Merton (1969, 1971) solved the frictionless dynamic
+consumption&ndash;investment problem, giving the constant optimal risky weight
+\(w^\*=(\mu-r)/(\gamma\sigma^2)\) that anchors our no-trade region.</p>
+<p><b>Transaction-cost models.</b> Magill &amp; Constantinides (1976) introduced proportional
+costs and the no-trade region; Constantinides (1986) quantified its asset-pricing
+implications; Davis &amp; Norman (1990) and Shreve &amp; Soner (1994) provided the
+singular-control and viscosity-solution foundations, including the small-cost asymptotics in
+which the half-width of the band scales like \(tc^{1/3}\). Dumas &amp; Luciano (1991)
+obtained an exact infinite-horizon solution; Liu (2004) extended to multiple risky assets and
+G&acirc;rleanu &amp; Pedersen (2013) to predictable returns under quadratic costs.</p>
+<p><b>Learning-based control.</b> ML has been applied to high-dimensional control via deep
+BSDE/PDE solvers (Han, Jentzen &amp; E, 2018) and to hedging under frictions via deep hedging
+(Buehler et al., 2019). We instead study the simplest paradigm &mdash; supervised
+<em>imitation</em> of a known optimal controller &mdash; precisely to isolate when and why it
+fails.</p>
+
+<h2>3. Mathematical Framework</h2>
+<h3>3.1 Market model</h3>
+<p>Time is discrete, \(t=0,1,\dots,N\), with step length \(dt=T/N\). The risky one-step gross
+return is</p>
+\[ R_{t+1}=\frac{S_{t+1}}{S_t}=\exp\!\Big((\mu-\tfrac12\sigma^2)\,dt+\sigma\sqrt{dt}\,Z_{t+1}\Big),
+\qquad Z_{t+1}\stackrel{\text{iid}}{\sim}N(0,1), \]
+<p>with risk-free gross return \(R_f=e^{r\,dt}\). This implies the lognormal moments
+\(\E[R]=e^{\mu dt}\) and \(\E[R^2]=e^{2\mu dt+\sigma^2 dt}\), which validate the quadrature.</p>
+
+<h3>3.2 Wealth, state, and control</h3>
+<p>At date \(t\), before trading, the investor holds \(A_t\) dollars in risky and \(C_t\) in
+cash, with wealth \(W_t=A_t+C_t\) and risky fraction \(x_t=A_t/W_t\). The control is the
+<em>post-trade</em> risky fraction \(y_t\in[0,1]\) (no shorting, no leverage). The pair
+\((W_t,x_t)\) is the state; \(y_t\) the action.</p>
+
+<h3>3.3 Transaction costs and the wealth-update identity</h3>
+<p>Normalize \(W_t=1\). Choosing post-trade fraction \(y\) requires trading \(\delta\)
+dollars; the cost \(tc\,|\delta|\) is paid from cash, so post-trade wealth is
+\(m=1-tc\,|\delta|\) with \(\delta=ym-x\). Solving the fixed point:</p>
+<div class="prop">
+<b>Proposition 1 (wealth multiplier).</b> For \(tc\in[0,1)\), \(x,y\in[0,1]\),
+\[ m(x,y)=\begin{cases}\dfrac{1+tc\,x}{1+tc\,y}, & y\ge x\ \ (\text{buy}),\\[1.6ex]
+\dfrac{1-tc\,x}{1-tc\,y}, & y< x\ \ (\text{sell}),\end{cases} \]
+and \(\delta=(y-x)/(1\pm tc\,y)\), so \(\operatorname{sign}(\delta)=\operatorname{sign}(y-x)\)
+and \(m(x,x)=1\).
+</div>
+<p><em>Proof.</em> If \(\delta>0\): \(m=1-tc\delta\) and \(\delta=ym-x\) give
+\(m(1+tc\,y)=1+tc\,x\); back-substitution yields \(\delta=(y-x)/(1+tc\,y)>0\iff y>x\). The
+selling branch is symmetric. At \(y=x\), \(m=1\). \(\square\)</p>
+
+<h3>3.4 Preferences and the Bellman recursion</h3>
+<p>The investor maximizes \(\E[U(W_N)]\) with \(U(W)=W^{1-\gamma}/(1-\gamma)\),
+\(\gamma>0,\gamma\ne1\). After trading to \(y\) at wealth \(m\), one market step gives
+\(W'=m\,\phi(y,R)\) and fraction \(x'\), where</p>
+\[ \phi(y,R)=yR+(1-y)R_f,\qquad x'(y,R)=\frac{yR}{\phi(y,R)}. \]
+\[ V_N(W,x)=U(W),\qquad V_t(W,x)=\max_{y\in[0,1]}\E_R\big[V_{t+1}(W',x')\big]. \]
+
+<h3>3.5 Dimensionality reduction by homogeneity</h3>
+<div class="prop">
+<b>Proposition 2 (homogeneity reduction).</b> \(V_t(W,x)=W^{1-\gamma}g_t(x)\), where
+\[ g_t(x)=\max_{y\in[0,1]} m(x,y)^{1-\gamma}\,
+\E_R\big[\phi(y,R)^{1-\gamma}\,g_{t+1}(x'(y,R))\big],\qquad g_N(x)\equiv\tfrac{1}{1-\gamma}. \]
+</div>
+<p><em>Proof.</em> Backward induction. At \(N\), \(g_N\equiv1/(1-\gamma)\). If
+\(V_{t+1}=W^{1-\gamma}g_{t+1}\), then trading sends wealth to \(W\,m(x,y)\) and the step to
+\(W'=W\,m(x,y)\phi(y,R)\) with \(x'\) independent of \(W\); factoring \(W^{1-\gamma}\) out of
+the expectation gives the result, and the maximizer \(y^\*(t,x)\) depends only on
+\((t,x)\). \(\square\)</p>
+
+<h3>3.6 The no-trade region</h3>
+<p>With \(y^\*(t,x)=\arg\max_y(\cdot)\), the no-trade region
+\(\mathrm{NT}_t=\{x:y^\*(t,x)=x\}=[\underline{x}_t,\overline{x}_t]\) is an interval around
+\(w^\*\), and the policy is bang-bang to the boundary:</p>
+\[ y^\*(t,x)=\begin{cases}\underline{x}_t,&x<\underline{x}_t\ \ (\text{buy to edge}),\\
+x,&x\in[\underline{x}_t,\overline{x}_t]\ \ (\text{hold}),\\
+\overline{x}_t,&x>\overline{x}_t\ \ (\text{sell to edge}).\end{cases} \]
+
+<h2>4. Numerical Solution</h2>
+<p>We discretize \(x\) on \(n_x=201\) points in \([0,1]\); the action \(y\) shares the grid.
+The return expectation uses 21-node Gauss&ndash;Hermite quadrature,
+\(\E[f(R)]\approx\pi^{-1/2}\sum_i w_i f(R(\sqrt2 z_i))\), reproducing the lognormal moments to
+relative error \(<10^{-8}\). Backward induction iterates the reduced recursion: per action we
+precompute \(x'(y,R)\) and \(\phi(y,R)\), interpolate \(g_{t+1}\) at \(x'\) linearly, form the
+\((n_x\times n_y)\) cost matrix \(m(x,y)\), and maximize over \(y\) by a vectorized argmax.
+Per-step cost is \(O(n_x n_y n_q)\); the full 52-step solve takes \(\approx0.02\) s. The
+no-trade edges are read off as the range of \(x\) with \(|y^\*(t,x)-x|\) within one grid
+spacing.</p>
+
+<div class="caption">Table 1. Base-case parameters.</div>
+<table>
+<thead><tr><th class="l">Symbol</th><th class="l">Meaning</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>\(\mu\)</td><td class="l">risky drift (annual)</td><td>0.08</td></tr>
+<tr><td>\(\sigma\)</td><td class="l">risky volatility (annual)</td><td>0.20</td></tr>
+<tr><td>\(r\)</td><td class="l">risk-free rate (annual)</td><td>0.02</td></tr>
+<tr><td>\(\gamma\)</td><td class="l">relative risk aversion</td><td>5.0</td></tr>
+<tr><td>\(tc\)</td><td class="l">proportional cost rate</td><td>0.01</td></tr>
+<tr><td>\(T,\ N\)</td><td class="l">horizon / rebalancing dates</td><td>1.0 yr / 52</td></tr>
+<tr><td>\(w^\*\)</td><td class="l">Merton fraction</td><td>0.300</td></tr>
+</tbody>
+</table>
+
+<h2>5. Machine-Learning Approximation</h2>
+<p>We form the supervised dataset \(\{((\tau_t,x_j),y^\*(t,x_j))\}\) over all dates and grid
+points (\(\tau_t=t/N\)), giving \(52\times201=10{,}452\) examples. The student is a 2&times;64
+\(\tanh\) MLP with sigmoid output (so \(y\in[0,1]\)), 4,417 parameters. We minimize MSE with
+Adam (lr \(10^{-3}\), weight decay \(10^{-5}\), batch 256, 400 epochs), 15% validation
+hold-out; it converges to validation MSE \(2.1\times10^{-4}\) in under 20 s on CPU. Inference
+is a single forward pass &mdash; no grid lookup.</p>
+
+<figure>
+<img src="../results/figures/fig5_training_history.png" alt="training history"/>
+<figcaption>Figure (ML). Imitation-learning training curve (log-scale MSE).</figcaption>
+</figure>
+
+<h2>6. Experimental Results</h2>
+<h3>6.1 No-trade regions</h3>
+<figure>
+<img src="../results/figures/fig1_no_trade_region.png" alt="no-trade region"/>
+<figcaption>Figure 1. The optimal no-trade region. Narrow and nearly constant around
+\(w^\*=0.30\) (at \(t=0\): \([0.235,0.365]\), width 0.130), flaring open near the horizon
+&mdash; the horizon effect.</figcaption>
+</figure>
+<figure>
+<img src="../results/figures/fig2_policy_slices.png" alt="policy slices"/>
+<figcaption>Figure 2. Optimal policy \(y^\*(x)\): flat at the lower edge, identity \(y=x\) inside
+the band, flat at the upper edge (bang-bang to boundary).</figcaption>
+</figure>
+<figure>
+<img src="../results/figures/fig3_value_function.png" alt="value function"/>
+<figcaption>Figure 3. Reduced value function \(g_t(x)\) across the horizon.</figcaption>
+</figure>
+
+<h3>6.2 Comparative statics</h3>
+<div class="caption">Table 2. No-trade band at \(t=0\) vs cost &nbsp;&bull;&nbsp; Table 3. Band vs risk aversion.</div>
+<table>
+<thead><tr><th>\(tc\)</th><th>lower</th><th>upper</th><th>width</th>
+<th style="border-left:1px solid #bbb">\(\gamma\)</th><th>\(w^\*\)</th><th>lower</th><th>upper</th><th>width</th></tr></thead>
+<tbody>
+<tr><td>0.0005</td><td>0.280</td><td>0.320</td><td>0.040</td><td style="border-left:1px solid #bbb">2</td><td>0.750</td><td>0.615</td><td>0.885</td><td>0.270</td></tr>
+<tr><td>0.001</td><td>0.275</td><td>0.325</td><td>0.050</td><td style="border-left:1px solid #bbb">3</td><td>0.500</td><td>0.400</td><td>0.600</td><td>0.200</td></tr>
+<tr><td>0.002</td><td>0.270</td><td>0.330</td><td>0.060</td><td style="border-left:1px solid #bbb">5</td><td>0.300</td><td>0.235</td><td>0.365</td><td>0.130</td></tr>
+<tr><td>0.005</td><td>0.255</td><td>0.345</td><td>0.090</td><td style="border-left:1px solid #bbb">8</td><td>0.188</td><td>0.140</td><td>0.235</td><td>0.095</td></tr>
+<tr><td>0.01</td><td>0.235</td><td>0.365</td><td>0.130</td><td style="border-left:1px solid #bbb">12</td><td>0.125</td><td>0.090</td><td>0.160</td><td>0.070</td></tr>
+<tr><td>0.02</td><td>0.190</td><td>0.415</td><td>0.225</td><td style="border-left:1px solid #bbb"></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>0.03</td><td>0.140</td><td>0.470</td><td>0.330</td><td style="border-left:1px solid #bbb"></td><td></td><td></td><td></td><td></td></tr>
+</tbody>
+</table>
+<figure>
+<img src="../results/figures/fig4_band_vs_cost.png" alt="band vs cost"/>
+<figcaption>Figure 4. The no-trade region widens with the cost rate (consistent with the
+small-cost \(tc^{1/3}\) scaling), centered on \(w^\*\).</figcaption>
+</figure>
+
+<h3>6.3 Policy comparisons: learned vs optimal</h3>
+<figure>
+<img src="../results/figures/fig6_dp_vs_ml_policy.png" alt="dp vs ml"/>
+<figcaption>Figure 6. Learned (ML) vs optimal (DP) policy. The network smooths the no-trade
+kinks; the residual off-diagonal inside the band drives spurious trading.</figcaption>
+</figure>
+
+<h3>6.4 Performance metrics</h3>
+<p>Four strategies are simulated on a common set of 20,000 return paths (common random
+numbers). \(\mathrm{CE}=((1-\gamma)\E[U(W_T)])^{1/(1-\gamma)}\).</p>
+
+<div class="caption">Table 4. Performance starting <b>at</b> the target (\(x_0=w^\*=0.30\)). CE with 95% CI.</div>
+<table>
+<thead><tr><th class="l">Strategy</th><th>CE</th><th>95% CI</th><th>\(\E[W_T]\)</th><th>Turnover</th><th>Cost</th><th>Track. err.</th></tr></thead>
+<tbody>
+<tr><td class="l">DP optimal</td><td>1.02927</td><td>[1.02842, 1.03013]</td><td>1.0390</td><td>0.00003</td><td>4&times;10⁻⁷</td><td>&mdash;</td></tr>
+<tr><td class="l">Buy &amp; hold</td><td>1.02927</td><td>[1.02842, 1.03013]</td><td>1.0390</td><td>0.00000</td><td>0</td><td>0.0002</td></tr>
+<tr><td class="l">Periodic</td><td>1.02821</td><td>[1.02735, 1.02908]</td><td>1.0375</td><td>0.1119</td><td>0.00114</td><td>0.0056</td></tr>
+<tr><td class="l">ML imitation</td><td>1.02606</td><td>[1.02500, 1.02713]</td><td>1.0402</td><td>0.2141</td><td>0.00217</td><td>0.0052</td></tr>
+</tbody>
+</table>
+
+<div class="caption">Table 5. Performance starting <b>off</b> the target (\(x_0=0.80\)).</div>
+<table>
+<thead><tr><th class="l">Strategy</th><th>CE</th><th>95% CI</th><th>\(\E[W_T]\)</th><th>Turnover</th><th>Cost</th><th>Track. err.</th></tr></thead>
+<tbody>
+<tr><td class="l">DP optimal</td><td>1.02393</td><td>[1.02293, 1.02494]</td><td>1.0372</td><td>0.4526</td><td>0.00453</td><td>&mdash;</td></tr>
+<tr><td class="l">Buy &amp; hold</td><td>1.02378</td><td>[1.02292, 1.02464]</td><td>1.0337</td><td>0.5000</td><td>0.00500</td><td>0.0083</td></tr>
+<tr><td class="l">Periodic</td><td>1.02269</td><td>[1.02183, 1.02356]</td><td>1.0320</td><td>0.6120</td><td>0.00614</td><td>0.0100</td></tr>
+<tr><td class="l">ML imitation</td><td>1.02063</td><td>[1.01956, 1.02171]</td><td>1.0351</td><td>0.7065</td><td>0.00709</td><td>0.0065</td></tr>
+</tbody>
+</table>
+
+<div class="caption">Table 6. Paired utility advantage of DP optimal (common random numbers). Positive = DP better.</div>
+<table>
+<thead><tr><th class="l">Start</th><th class="l">DP vs</th><th>Mean adv. (&times;10³)</th><th>\(t\)-stat</th><th>DP better @ 95%</th></tr></thead>
+<tbody>
+<tr><td class="l">on-target</td><td class="l">ML imitation</td><td>+2.799</td><td>20.1</td><td>yes</td></tr>
+<tr><td class="l">on-target</td><td class="l">Periodic</td><td>+0.918</td><td>24.1</td><td>yes</td></tr>
+<tr><td class="l">on-target</td><td class="l">Buy &amp; hold</td><td>&minus;0.0001</td><td>&minus;0.4</td><td>no (tie)</td></tr>
+<tr><td class="l">off-target</td><td class="l">ML imitation</td><td>+2.959</td><td>28.8</td><td>yes</td></tr>
+<tr><td class="l">off-target</td><td class="l">Periodic</td><td>+1.108</td><td>17.0</td><td>yes</td></tr>
+<tr><td class="l">off-target</td><td class="l">Buy &amp; hold</td><td>+0.140</td><td>2.0</td><td>yes</td></tr>
+</tbody>
+</table>
+
+<figure>
+<img src="../results/figures/fig7_wealth_distributions.png" alt="wealth distributions"/>
+<figcaption>Figure 7. Terminal-wealth distributions (on-target start).</figcaption>
+</figure>
+<figure>
+<img src="../results/figures/fig8_performance_bars.png" alt="performance bars"/>
+<figcaption>Figure 8. Certainty equivalent (with 95% CI), turnover, and cost by strategy.</figcaption>
+</figure>
+
+<p><b>Three findings.</b></p>
+<ol>
+<li><b>The DP policy is optimal.</b> Highest CE; dominates ML and periodic with large
+\(t\)-stats (20&ndash;29). On-target it ties buy-and-hold (\(t=-0.4\)): a wide band makes
+optimal behavior &ldquo;do nothing.&rdquo; Off-target it beats all baselines, trading in most
+cost-efficiently (turnover 0.45 vs 0.50 for buy-and-hold, 0.61 for periodic).</li>
+<li><b>Naive imitation is the worst strategy.</b> Despite tiny MSE and small tracking error
+(0.005), the ML policy has the highest turnover (0.21 vs \(3\times10^{-5}\)) and cost, and the
+lowest CE &mdash; it trades continuously where the optimum holds.</li>
+<li><b>Low action error \(\ne\) good control.</b> Errors inside the inaction region are
+economically amplified into turnover and cost &mdash; invisible to an action-space MSE
+objective.</li>
+</ol>
+
+<h3>6.4 Repairing the imitation</h3>
+<p>A diagnosis is worth little unless it predicts a fix. If the failure really is the missing
+inaction region, restoring that region should recover the lost performance &mdash; and nothing
+else should be needed. We test two ways.</p>
+<p><b>Dead-zone wrapper (inference time).</b> Leave the network alone and snap small predicted
+trades to exact inaction: \(y = x\) whenever \(|\hat y - x| \le \delta\), else \(y=\hat y\).
+Returning \(x\) <i>exactly</i> is what matters &mdash; cost is charged on any deviation.</p>
+<p><b>Cost-aware objective (training time).</b> Charge the student for trading more than its
+teacher: \(\mathcal{L} = \mathrm{MSE}(\hat y, y^{*}) + \lambda\,\mathbb{E}[(|\hat y - x| -
+|y^{*} - x|)^{+}]\). The asymmetry is deliberate: penalizing \(|\hat y - x|\) outright would
+also discourage the large, correct trades made from outside the band.</p>
+<img src="../results/figures/fig9_remedies.png" alt="remedies"/>
+<ol>
+<li><b>The dead-zone recovers the optimum exactly.</b> At \(\delta = 0.05\) the learned policy
+reaches CE \(1.029272\) &mdash; the DP value to six decimals &mdash; with turnover
+\(9\times10^{-17}\). The paired test gives \(t=-0.4\): after the repair the network is no
+longer statistically distinguishable from optimal, having been beaten at \(t=20.1\) before.</li>
+<li><b>The transition is where the mechanism says.</b> The in-band residual is
+\(9.6\times10^{-3}\); dead-zones below it do nothing (3.5% of the gap at \(\delta=0.002\)),
+and recovery happens as \(\delta\) crosses it (39.5%, 96.1%, 100% at \(\delta=0.01, 0.02,
+0.05\)).</li>
+<li><b>The cost-aware loss attacks the same quantity.</b> It shrinks the residual
+\(9.6\times10^{-3} \to 2.6\times10^{-3}\) and closes 54.3% of the gap alone; combined, a
+dead-zone five times tighter suffices.</li>
+<li><b>\(\delta\) is a real trade-off.</b> Off-target, the same \(\delta=0.05\) closes 99.2%
+rather than 100% and under-trades slightly &mdash; pushed far enough, a dead-zone refuses to
+correct a bad allocation at all.</li>
+</ol>
+
+<h3>6.5 Is the failure robust?</h3>
+<p>One seed and one architecture describe a failure but do not establish one. We retrain across
+10 independent seeds and 7 architectures spanning two orders of magnitude in capacity. See
+<code>scripts/run_robustness.py</code> and the figure below.</p>
+<img src="../results/figures/fig10_robustness.png" alt="robustness"/>
+
+<h2>7. Discussion</h2>
+<p><b>Interpretation.</b> The failure is not capacity or optimization but a representational
+mismatch with the geometry of optimal control: a free boundary plus an identity map. A smooth
+regressor approximates the identity with a wiggle of size \(\varepsilon\), producing turnover
+of order \(\varepsilon\) per step (first order in \(N\)) while the allocation benefit is only
+second order &mdash; so small \(\varepsilon\) still hurts.</p>
+<p><b>Remedies.</b> (i) A <em>dead-zone</em> wrapper: predict band edges / a hold-vs-trade
+classifier and snap to &ldquo;hold&rdquo; for small predicted trades, restoring inaction. (ii)
+A <em>cost-aware loss</em> penalizing predicted turnover, or imitation in <em>value</em> space
+(regress \(g_t\), act greedily), aligning training with economic performance.</p>
+<p><b>Computational trade-offs.</b> For this 1-D problem the DP solve is trivial (0.02 s), so
+ML offers no speed gain here; its appeal is asymptotic, in higher dimensions where the grid is
+infeasible. Our result is a cautionary calibration: build the inaction structure into the
+hypothesis class or loss before scaling.</p>
+<p><b>Practical implications.</b> The strength of buy-and-hold over one year, and the optimal
+policy&rsquo;s near-inaction on target, both underline that the cheapest correct action is
+usually to do nothing. Turnover is a cost, not a virtue.</p>
+
+<h2>8. Limitations and Future Work</h2>
+<ul>
+<li><b>Multi-asset extension:</b> homogeneity survives, but the band becomes a polytope and
+the grid grows exponentially &mdash; where learned controllers should help.</li>
+<li><b>Stochastic volatility / predictable returns:</b> richer time- and state-dependence of
+the band.</li>
+<li><b>Deep variational solvers:</b> solve the HJB directly with neural nets, or train under a
+frictional P&amp;L objective (deep hedging), removing the teacher.</li>
+<li><b>Cost structure:</b> fixed/quadratic costs change the geometry (fixed costs induce jumps
+to an interior target).</li>
+<li><b>Intermediate consumption / infinite horizon.</b></li>
+</ul>
+
+<h2>9. Conclusion</h2>
+<p>We formulated portfolio rebalancing under proportional transaction costs as a finite-horizon
+stochastic control problem, reduced it to one dimension via CRRA homogeneity, and solved it
+exactly by backward induction. The solver reproduces the classical no-trade region and its
+comparative statics &mdash; widening with cost (\(\sim tc^{1/3}\)), narrowing with risk
+aversion, flaring near the horizon. A lightweight neural network trained by naive supervised
+imitation, though accurate in mean-squared action error, is the worst-performing strategy
+because it cannot represent the no-trade region and over-trades. The lesson generalizes:
+imitating optimal control requires encoding the inaction structure &mdash; via a dead-zone, a
+cost-aware loss, or value-space learning &mdash; not merely minimizing action error.</p>
+
+<h2>Reproducibility and code availability</h2>
+<p>Every number, table and figure here is regenerated by a single command,
+<code>python scripts/run_all.py</code>, in about 20 seconds on a laptop CPU. All randomness
+derives from one seed (<code>Config.seed = 12345</code>) and every economic and numerical
+parameter lives in a single <code>Config</code> dataclass, so repeated runs reproduce the
+committed tables, checkpoints and figures <em>byte for byte</em>. The only artifacts excluded
+are wall-clock timings, which are machine-dependent and written to a separate file.</p>
+<p>An automated <code>pytest</code> suite checks the claims above rather than merely exercising
+the code: the quadrature against analytic lognormal moments; the proportional-cost identity,
+including that no-trade is exactly costless; that the band brackets the Merton fraction, widens
+with \(tc\) at a fitted log&ndash;log slope consistent with \(tc^{1/3}\), narrows with
+\(\gamma\), and collapses to the Merton point at \(tc=0\); that the band is stable under grid
+and quadrature refinement; that the learned policy is off the \(y=x\) diagonal at
+<em>every</em> point inside the band; and that every figure, table entry and quoted statistic
+in the manuscript agrees with the generated results file. The exact environment is pinned in
+<code>requirements-lock.txt</code>.</p>
+
+<div class="note">References in <code>refs.bib</code> (16 entries). This HTML is a convenience
+preview; the authoritative manuscript is <code>paper/main.tex</code>, typeset as
+<code>paper/main.pdf</code> (rebuild with <code>python scripts/build_paper.py</code>, or
+compile on Overleaf). Generated from <code>results/</code> artifacts produced by
+<code>python scripts/run_all.py</code>.</div>
+
+</body>
+</html>

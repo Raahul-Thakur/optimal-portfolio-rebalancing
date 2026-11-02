@@ -1,0 +1,730 @@
+{
+  "config": {
+    "mu": 0.08,
+    "sigma": 0.2,
+    "r": 0.02,
+    "gamma": 5.0,
+    "tc": 0.01,
+    "T": 1.0,
+    "n_steps": 52,
+    "n_x": 201,
+    "x_min": 0.0,
+    "x_max": 1.0,
+    "n_quad": 21,
+    "ml_hidden": [
+      64,
+      64
+    ],
+    "ml_epochs": 400,
+    "ml_batch_size": 256,
+    "ml_lr": 0.001,
+    "ml_weight_decay": 1e-05,
+    "ml_val_frac": 0.15,
+    "deadzone_delta": 0.01,
+    "cost_aware_lambda": 1.0,
+    "n_paths": 20000,
+    "periodic_every": 4,
+    "seed": 12345,
+    "dt": 0.019230769230769232,
+    "merton_fraction": 0.29999999999999993
+  },
+  "dp": {
+    "band_t0_lower": 0.23500000000000001,
+    "band_t0_upper": 0.365,
+    "band_t0_width": 0.12999999999999998,
+    "merton_fraction": 0.29999999999999993
+  },
+  "band_vs_cost": {
+    "tc": [
+      0.0005,
+      0.001,
+      0.002,
+      0.005,
+      0.01,
+      0.02,
+      0.03
+    ],
+    "band_lower": [
+      0.28,
+      0.275,
+      0.27,
+      0.255,
+      0.23500000000000001,
+      0.19,
+      0.14
+    ],
+    "band_upper": [
+      0.32,
+      0.325,
+      0.33,
+      0.34500000000000003,
+      0.365,
+      0.41500000000000004,
+      0.47000000000000003
+    ],
+    "band_width": [
+      0.03999999999999998,
+      0.04999999999999999,
+      0.06,
+      0.09000000000000002,
+      0.12999999999999998,
+      0.22500000000000003,
+      0.33
+    ]
+  },
+  "band_vs_gamma": {
+    "gamma": [
+      2.0,
+      3.0,
+      5.0,
+      8.0,
+      12.0
+    ],
+    "merton_fraction": [
+      0.7499999999999998,
+      0.4999999999999999,
+      0.29999999999999993,
+      0.18749999999999994,
+      0.12499999999999997
+    ],
+    "band_lower": [
+      0.615,
+      0.4,
+      0.23500000000000001,
+      0.14,
+      0.09
+    ],
+    "band_upper": [
+      0.885,
+      0.6,
+      0.365,
+      0.23500000000000001,
+      0.16
+    ],
+    "band_width": [
+      0.27,
+      0.19999999999999996,
+      0.12999999999999998,
+      0.095,
+      0.07
+    ]
+  },
+  "ml": {
+    "final_train_mse": 0.00021251398076629031,
+    "final_val_mse": 0.0002141834847861901,
+    "n_params": 4417
+  },
+  "performance_on_target": [
+    {
+      "strategy": "DP optimal",
+      "mean_terminal_wealth": 1.038995999288622,
+      "median_terminal_wealth": 1.0328347516523362,
+      "std_terminal_wealth": 0.06540215851815247,
+      "expected_utility": -0.2227507221137983,
+      "expected_utility_se": 0.00037832749917243095,
+      "certainty_equivalent": 1.0292721504785922,
+      "ce_ci_low": 1.0284173341311411,
+      "ce_ci_high": 1.0301305312790814,
+      "mean_turnover": 3.419792352827839e-05,
+      "mean_total_cost": 3.966814833073984e-07,
+      "tracking_error": NaN
+    },
+    {
+      "strategy": "ML imitation",
+      "mean_terminal_wealth": 1.040167344692011,
+      "median_terminal_wealth": 1.0371310436663648,
+      "std_terminal_wealth": 0.07729956716290819,
+      "expected_utility": -0.22554986656897777,
+      "expected_utility_se": 0.0004792756352008783,
+      "certainty_equivalent": 1.0260637829119603,
+      "ce_ci_low": 1.0249982060311105,
+      "ce_ci_high": 1.0271349217375212,
+      "mean_turnover": 0.2141435634636473,
+      "mean_total_cost": 0.0021716012518456,
+      "tracking_error": 0.005236937260910677
+    },
+    {
+      "strategy": "Periodic",
+      "mean_terminal_wealth": 1.0375064421385545,
+      "median_terminal_wealth": 1.0356762496601635,
+      "std_terminal_wealth": 0.062328662460593126,
+      "expected_utility": -0.22366857454647338,
+      "expected_utility_se": 0.0003851045578080116,
+      "certainty_equivalent": 1.0282145843554393,
+      "ce_ci_low": 1.0273489412370553,
+      "ce_ci_high": 1.0290838867594967,
+      "mean_turnover": 0.1119339047921656,
+      "mean_total_cost": 0.0011423873516158848,
+      "tracking_error": 0.005616851796886992
+    },
+    {
+      "strategy": "Buy & hold",
+      "mean_terminal_wealth": 1.038998430985785,
+      "median_terminal_wealth": 1.0328347516523357,
+      "std_terminal_wealth": 0.06541689040652258,
+      "expected_utility": -0.2227505788359333,
+      "expected_utility_se": 0.0003783398261104057,
+      "certainty_equivalent": 1.029272315990935,
+      "ce_ci_low": 1.0284174711628504,
+      "ce_ci_high": 1.0301307255095011,
+      "mean_turnover": 0.0,
+      "mean_total_cost": 0.0,
+      "tracking_error": 0.00019696032866375716
+    }
+  ],
+  "paired_on_target": [
+    {
+      "reference": "DP optimal",
+      "vs": "ML imitation",
+      "mean_utility_advantage": 0.0027991444551794756,
+      "se": 0.00013914861125737812,
+      "t_stat": 20.116222719621685,
+      "ci_low": 0.0025264131771150144,
+      "ci_high": 0.003071875733243937,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "Periodic",
+      "mean_utility_advantage": 0.0009178524326750909,
+      "se": 3.807372759883579e-05,
+      "t_stat": 24.10723852274335,
+      "ci_low": 0.0008432279265813727,
+      "ci_high": 0.000992476938768809,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "Buy & hold",
+      "mean_utility_advantage": -1.4327786497291896e-07,
+      "se": 3.6815075986476444e-07,
+      "t_stat": -0.3891825865728222,
+      "ci_low": -8.648533543078573e-07,
+      "ci_high": 5.782976243620192e-07,
+      "reference_better_95pct": false
+    }
+  ],
+  "performance_off_target": [
+    {
+      "strategy": "DP optimal",
+      "mean_terminal_wealth": 1.0371673164565112,
+      "median_terminal_wealth": 1.030807725207998,
+      "std_terminal_wealth": 0.07598567101700578,
+      "expected_utility": -0.22743176437078955,
+      "expected_utility_se": 0.00045557127494024374,
+      "certainty_equivalent": 1.0239346081228993,
+      "ce_ci_low": 1.0229320497617247,
+      "ce_ci_high": 1.0249420987773301,
+      "mean_turnover": 0.452623978246729,
+      "mean_total_cost": 0.004531338971781192,
+      "tracking_error": NaN
+    },
+    {
+      "strategy": "ML imitation",
+      "mean_terminal_wealth": 1.0350888472530817,
+      "median_terminal_wealth": 1.0315550710454668,
+      "std_terminal_wealth": 0.07818564801694118,
+      "expected_utility": -0.23039068388520614,
+      "expected_utility_se": 0.0004955515165870598,
+      "certainty_equivalent": 1.02063104349922,
+      "ce_ci_low": 1.019558174879276,
+      "ce_ci_high": 1.021709580818633,
+      "mean_turnover": 0.7064985600956208,
+      "mean_total_cost": 0.007085317700217186,
+      "tracking_error": 0.006495272677522259
+    },
+    {
+      "strategy": "Periodic",
+      "mean_terminal_wealth": 1.0320476533639311,
+      "median_terminal_wealth": 1.0299239149783619,
+      "std_terminal_wealth": 0.06244717169486563,
+      "expected_utility": -0.2285393080452506,
+      "expected_utility_se": 0.00039489556741009984,
+      "certainty_equivalent": 1.0226918032322743,
+      "ce_ci_low": 1.0218277424419167,
+      "ce_ci_high": 1.0235595296868196,
+      "mean_turnover": 0.6119639178578998,
+      "mean_total_cost": 0.006136755330555382,
+      "tracking_error": 0.010041366007501778
+    },
+    {
+      "strategy": "Buy & hold",
+      "mean_terminal_wealth": 1.0336755142413774,
+      "median_terminal_wealth": 1.0273396447712062,
+      "std_terminal_wealth": 0.06585831483214329,
+      "expected_utility": -0.22757160076901578,
+      "expected_utility_se": 0.00039035845866985713,
+      "certainty_equivalent": 1.0237772770540445,
+      "ce_ci_low": 1.022918588119831,
+      "ce_ci_high": 1.0246395822653651,
+      "mean_turnover": 0.5000000000000001,
+      "mean_total_cost": 0.005000000000000003,
+      "tracking_error": 0.008322980079903978
+    }
+  ],
+  "paired_off_target": [
+    {
+      "reference": "DP optimal",
+      "vs": "ML imitation",
+      "mean_utility_advantage": 0.0029589195144165497,
+      "se": 0.0001026916871316164,
+      "t_stat": 28.813622573209887,
+      "ci_low": 0.0027576438076385816,
+      "ci_high": 0.0031601952211945178,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "Periodic",
+      "mean_utility_advantage": 0.0011075436744610685,
+      "se": 6.502396010038108e-05,
+      "t_stat": 17.03285485459963,
+      "ci_low": 0.0009800967126643216,
+      "ci_high": 0.0012349906362578154,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "Buy & hold",
+      "mean_utility_advantage": 0.00013983639822619638,
+      "se": 6.967852708402666e-05,
+      "t_stat": 2.006879365540621,
+      "ci_low": 3.2664851415041237e-06,
+      "ci_high": 0.0002764063113108886,
+      "reference_better_95pct": true
+    }
+  ],
+  "remedy_diagnostics": {
+    "deltas": [
+      0.002,
+      0.005,
+      0.01,
+      0.02,
+      0.05
+    ],
+    "in_band_residual_plain": 0.009605800134164314,
+    "in_band_residual_cost_aware": 0.0025510246223873594,
+    "cost_aware_final_val_mse": 0.0004583675181493163,
+    "cost_aware_lambda": 1.0
+  },
+  "remedies_on_target": [
+    {
+      "strategy": "DP optimal",
+      "mean_terminal_wealth": 1.038995999288622,
+      "median_terminal_wealth": 1.0328347516523362,
+      "std_terminal_wealth": 0.06540215851815247,
+      "expected_utility": -0.2227507221137983,
+      "expected_utility_se": 0.00037832749917243095,
+      "certainty_equivalent": 1.0292721504785922,
+      "ce_ci_low": 1.0284173341311411,
+      "ce_ci_high": 1.0301305312790814,
+      "mean_turnover": 3.419792352827839e-05,
+      "mean_total_cost": 3.966814833073984e-07,
+      "tracking_error": NaN
+    },
+    {
+      "strategy": "ML imitation",
+      "mean_terminal_wealth": 1.040167344692011,
+      "median_terminal_wealth": 1.0371310436663648,
+      "std_terminal_wealth": 0.07729956716290819,
+      "expected_utility": -0.22554986656897777,
+      "expected_utility_se": 0.0004792756352008783,
+      "certainty_equivalent": 1.0260637829119603,
+      "ce_ci_low": 1.0249982060311105,
+      "ce_ci_high": 1.0271349217375212,
+      "mean_turnover": 0.2141435634636473,
+      "mean_total_cost": 0.0021716012518456,
+      "tracking_error": 0.005236937260910677
+    },
+    {
+      "strategy": "ML + dead-zone 0.002",
+      "mean_terminal_wealth": 1.0402739284284452,
+      "median_terminal_wealth": 1.037248662580426,
+      "std_terminal_wealth": 0.07728991433419954,
+      "expected_utility": -0.22545239783970528,
+      "expected_utility_se": 0.00047898113547523835,
+      "certainty_equivalent": 1.0261746632180107,
+      "ce_ci_low": 1.0251091650745965,
+      "ce_ci_high": 1.0272457218780275,
+      "mean_turnover": 0.20315518549116207,
+      "mean_total_cost": 0.002060096902612856,
+      "tracking_error": 0.005250580690695171
+    },
+    {
+      "strategy": "ML + dead-zone 0.005",
+      "mean_terminal_wealth": 1.0401156687849782,
+      "median_terminal_wealth": 1.0363645736003404,
+      "std_terminal_wealth": 0.07594909698771488,
+      "expected_utility": -0.22507751490743066,
+      "expected_utility_se": 0.0004645584186263496,
+      "certainty_equivalent": 1.0266016886844882,
+      "ce_ci_low": 1.025566045504168,
+      "ce_ci_high": 1.0276425821744406,
+      "mean_turnover": 0.171434170886282,
+      "mean_total_cost": 0.001737978760260165,
+      "tracking_error": 0.005941362340130499
+    },
+    {
+      "strategy": "ML + dead-zone 0.01",
+      "mean_terminal_wealth": 1.0395276599706764,
+      "median_terminal_wealth": 1.0336027143223743,
+      "std_terminal_wealth": 0.07321671598849118,
+      "expected_utility": -0.22443936561162622,
+      "expected_utility_se": 0.0004271595013396329,
+      "certainty_equivalent": 1.027330647015059,
+      "ce_ci_low": 1.0263748042156198,
+      "ce_ci_high": 1.028290957248732,
+      "mean_turnover": 0.12770705256159384,
+      "mean_total_cost": 0.0012987935242974996,
+      "tracking_error": 0.006107140762620943
+    },
+    {
+      "strategy": "ML + dead-zone 0.02",
+      "mean_terminal_wealth": 1.0389748988420373,
+      "median_terminal_wealth": 1.0324100770957034,
+      "std_terminal_wealth": 0.06586733095730095,
+      "expected_utility": -0.22285968257644517,
+      "expected_utility_se": 0.00037951021008419505,
+      "certainty_equivalent": 1.0291463195786354,
+      "ce_ci_low": 1.0282893596490887,
+      "ce_ci_high": 1.0300068623377645,
+      "mean_turnover": 0.008321237425160095,
+      "mean_total_cost": 8.52789328797709e-05,
+      "tracking_error": 0.001849525326120181
+    },
+    {
+      "strategy": "ML + dead-zone 0.05",
+      "mean_terminal_wealth": 1.0389984309857851,
+      "median_terminal_wealth": 1.0328347516523362,
+      "std_terminal_wealth": 0.06541689040652257,
+      "expected_utility": -0.2227505788359333,
+      "expected_utility_se": 0.0003783398261104057,
+      "certainty_equivalent": 1.029272315990935,
+      "ce_ci_low": 1.0284174711628504,
+      "ce_ci_high": 1.0301307255095011,
+      "mean_turnover": 8.832938040445875e-17,
+      "mean_total_cost": 9.208189766241048e-19,
+      "tracking_error": 0.00019696032866375798
+    },
+    {
+      "strategy": "ML cost-aware",
+      "mean_terminal_wealth": 1.0352530673829783,
+      "median_terminal_wealth": 1.0275352387543992,
+      "std_terminal_wealth": 0.05778634549486843,
+      "expected_utility": -0.2240231637060645,
+      "expected_utility_se": 0.0003275056088436928,
+      "certainty_equivalent": 1.027807472042598,
+      "ce_ci_low": 1.0270725235917897,
+      "ce_ci_high": 1.028545057600335,
+      "mean_turnover": 0.1064756248293179,
+      "mean_total_cost": 0.0010807565746951632,
+      "tracking_error": 0.0023171698542688328
+    },
+    {
+      "strategy": "ML cost-aware + dead-zone 0.01",
+      "mean_terminal_wealth": 1.0389941976420611,
+      "median_terminal_wealth": 1.0328347516523362,
+      "std_terminal_wealth": 0.06539434565668067,
+      "expected_utility": -0.22275119335245505,
+      "expected_utility_se": 0.00037831971869294045,
+      "certainty_equivalent": 1.0292716061120244,
+      "ce_ci_low": 1.028416809564494,
+      "ce_ci_high": 1.030129966949018,
+      "mean_turnover": 4.770515447386577e-05,
+      "mean_total_cost": 5.620245233417683e-07,
+      "tracking_error": 8.393244009657467e-05
+    }
+  ],
+  "remedies_paired_on_target": [
+    {
+      "reference": "DP optimal",
+      "vs": "ML imitation",
+      "mean_utility_advantage": 0.0027991444551794756,
+      "se": 0.00013914861125737812,
+      "t_stat": 20.116222719621685,
+      "ci_low": 0.0025264131771150144,
+      "ci_high": 0.003071875733243937,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML + dead-zone 0.002",
+      "mean_utility_advantage": 0.002701675725907023,
+      "se": 0.00013902132390285186,
+      "t_stat": 19.433534727341215,
+      "ci_low": 0.0024291939310574335,
+      "ci_high": 0.0029741575207566126,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML + dead-zone 0.005",
+      "mean_utility_advantage": 0.002326792793632391,
+      "se": 0.00012639971176213214,
+      "t_stat": 18.408212813104456,
+      "ci_low": 0.002079049358578612,
+      "ci_high": 0.00257453622868617,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML + dead-zone 0.01",
+      "mean_utility_advantage": 0.001688643497827946,
+      "se": 9.180834667107893e-05,
+      "t_stat": 18.393136997421774,
+      "ci_low": 0.0015086991383526313,
+      "ci_high": 0.0018685878573032608,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML + dead-zone 0.02",
+      "mean_utility_advantage": 0.0001089604626468915,
+      "se": 1.4170064326857712e-05,
+      "t_stat": 7.689482569275962,
+      "ci_low": 8.118713656625038e-05,
+      "ci_high": 0.0001367337887275326,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML + dead-zone 0.05",
+      "mean_utility_advantage": -1.4327786497597416e-07,
+      "se": 3.6815075986476746e-07,
+      "t_stat": -0.38918258658111776,
+      "ci_low": -8.648533543109183e-07,
+      "ci_high": 5.7829762435897e-07,
+      "reference_better_95pct": false
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML cost-aware",
+      "mean_utility_advantage": 0.0012724415922662012,
+      "se": 7.300092522349763e-05,
+      "t_stat": 17.430485824262213,
+      "ci_low": 0.0011293597788281458,
+      "ci_high": 0.0014155234057042566,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML cost-aware + dead-zone 0.01",
+      "mean_utility_advantage": 4.7123865670762183e-07,
+      "se": 2.2312066244402618e-07,
+      "t_stat": 2.1120350376596813,
+      "ci_low": 3.392215831733054e-08,
+      "ci_high": 9.085551550979131e-07,
+      "reference_better_95pct": true
+    }
+  ],
+  "remedies_off_target": [
+    {
+      "strategy": "DP optimal",
+      "mean_terminal_wealth": 1.0371673164565112,
+      "median_terminal_wealth": 1.030807725207998,
+      "std_terminal_wealth": 0.07598567101700578,
+      "expected_utility": -0.22743176437078955,
+      "expected_utility_se": 0.00045557127494024374,
+      "certainty_equivalent": 1.0239346081228993,
+      "ce_ci_low": 1.0229320497617247,
+      "ce_ci_high": 1.0249420987773301,
+      "mean_turnover": 0.452623978246729,
+      "mean_total_cost": 0.004531338971781192,
+      "tracking_error": NaN
+    },
+    {
+      "strategy": "ML imitation",
+      "mean_terminal_wealth": 1.0350888472530817,
+      "median_terminal_wealth": 1.0315550710454668,
+      "std_terminal_wealth": 0.07818564801694118,
+      "expected_utility": -0.23039068388520614,
+      "expected_utility_se": 0.0004955515165870598,
+      "certainty_equivalent": 1.02063104349922,
+      "ce_ci_low": 1.019558174879276,
+      "ce_ci_high": 1.021709580818633,
+      "mean_turnover": 0.7064985600956208,
+      "mean_total_cost": 0.007085317700217186,
+      "tracking_error": 0.006495272677522259
+    },
+    {
+      "strategy": "ML + dead-zone 0.002",
+      "mean_terminal_wealth": 1.0351678945692113,
+      "median_terminal_wealth": 1.0316476059032333,
+      "std_terminal_wealth": 0.07817195240978565,
+      "expected_utility": -0.2303147794640779,
+      "expected_utility_se": 0.000495305886324681,
+      "certainty_equivalent": 1.020715124985594,
+      "ce_ci_low": 1.0196423459084065,
+      "ce_ci_high": 1.0217935713442086,
+      "mean_turnover": 0.698047631620658,
+      "mean_total_cost": 0.006999467471012433,
+      "tracking_error": 0.006503414793734311
+    },
+    {
+      "strategy": "ML + dead-zone 0.005",
+      "mean_terminal_wealth": 1.0349940167874263,
+      "median_terminal_wealth": 1.0310478858188556,
+      "std_terminal_wealth": 0.0769438929169273,
+      "expected_utility": -0.22998838223680979,
+      "expected_utility_se": 0.00048217728866595434,
+      "certainty_equivalent": 1.0210770796028992,
+      "ce_ci_low": 1.0200308136715526,
+      "ce_ci_high": 1.0221287335252884,
+      "mean_turnover": 0.6672382242935686,
+      "mean_total_cost": 0.006687844932476092,
+      "tracking_error": 0.007027081529712395
+    },
+    {
+      "strategy": "ML + dead-zone 0.01",
+      "mean_terminal_wealth": 1.035040883906361,
+      "median_terminal_wealth": 1.0299256619667836,
+      "std_terminal_wealth": 0.07549986974768036,
+      "expected_utility": -0.22929638385576087,
+      "expected_utility_se": 0.00046047622829387835,
+      "certainty_equivalent": 1.0218465917772959,
+      "ce_ci_low": 1.020843535652838,
+      "ce_ci_high": 1.0228545952443309,
+      "mean_turnover": 0.6164550735385568,
+      "mean_total_cost": 0.006179422969981528,
+      "tracking_error": 0.007007488200372064
+    },
+    {
+      "strategy": "ML + dead-zone 0.02",
+      "mean_terminal_wealth": 1.036054808740947,
+      "median_terminal_wealth": 1.030041002246739,
+      "std_terminal_wealth": 0.07309679155154376,
+      "expected_utility": -0.2275921142957097,
+      "expected_utility_se": 0.0004400931278976219,
+      "certainty_equivalent": 1.0237542072824453,
+      "ce_ci_low": 1.0227864819429755,
+      "ce_ci_high": 1.0247265281605211,
+      "mean_turnover": 0.4809315404346522,
+      "mean_total_cost": 0.0048176598197946915,
+      "tracking_error": 0.003938441691941961
+    },
+    {
+      "strategy": "ML + dead-zone 0.05",
+      "mean_terminal_wealth": 1.0381724069398661,
+      "median_terminal_wealth": 1.0308851893272397,
+      "std_terminal_wealth": 0.07928905097879557,
+      "expected_utility": -0.2274546348650578,
+      "expected_utility_se": 0.0004706860927927296,
+      "certainty_equivalent": 1.023908868074065,
+      "ce_ci_low": 1.0228732610540885,
+      "ce_ci_high": 1.0249497389133615,
+      "mean_turnover": 0.4381788433264048,
+      "mean_total_cost": 0.004384271025613224,
+      "tracking_error": 0.006953257010216284
+    },
+    {
+      "strategy": "ML cost-aware",
+      "mean_terminal_wealth": 1.0363813976234744,
+      "median_terminal_wealth": 1.0314701727770719,
+      "std_terminal_wealth": 0.07557751335270975,
+      "expected_utility": -0.22815603128316847,
+      "expected_utility_se": 0.00046155553951569026,
+      "certainty_equivalent": 1.023121035055738,
+      "ce_ci_low": 1.0221093607456668,
+      "ce_ci_high": 1.024137736000991,
+      "mean_turnover": 0.5317755741412896,
+      "mean_total_cost": 0.005334799950913902,
+      "tracking_error": 0.002738312155134739
+    },
+    {
+      "strategy": "ML cost-aware + dead-zone 0.01",
+      "mean_terminal_wealth": 1.0376702261110116,
+      "median_terminal_wealth": 1.0314678738727459,
+      "std_terminal_wealth": 0.07737841618865378,
+      "expected_utility": -0.22746262624129143,
+      "expected_utility_se": 0.0004664033312078165,
+      "certainty_equivalent": 1.0238998747847796,
+      "ce_ci_low": 1.0228737121183231,
+      "ce_ci_high": 1.024931205506128,
+      "mean_turnover": 0.4464462802954745,
+      "mean_total_cost": 0.0044721930949673935,
+      "tracking_error": 0.003260999564146236
+    }
+  ],
+  "remedies_paired_off_target": [
+    {
+      "reference": "DP optimal",
+      "vs": "ML imitation",
+      "mean_utility_advantage": 0.0029589195144165497,
+      "se": 0.0001026916871316164,
+      "t_stat": 28.813622573209887,
+      "ci_low": 0.0027576438076385816,
+      "ci_high": 0.0031601952211945178,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML + dead-zone 0.002",
+      "mean_utility_advantage": 0.0028830150932883307,
+      "se": 0.00010276817329359452,
+      "t_stat": 28.053579244344,
+      "ci_low": 0.0026815894736328854,
+      "ci_high": 0.003084440712943776,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML + dead-zone 0.005",
+      "mean_utility_advantage": 0.002556617866020193,
+      "se": 9.62962726043748e-05,
+      "t_stat": 26.549499756068897,
+      "ci_low": 0.0023678771717156183,
+      "ci_high": 0.0027453585603247673,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML + dead-zone 0.01",
+      "mean_utility_advantage": 0.0018646194849712928,
+      "se": 8.189322527997276e-05,
+      "t_stat": 22.768910109433573,
+      "ci_low": 0.0017041087634225463,
+      "ci_high": 0.0020251302065200393,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML + dead-zone 0.02",
+      "mean_utility_advantage": 0.00016034992492011864,
+      "se": 2.5556464628615666e-05,
+      "t_stat": 6.274339086032042,
+      "ci_low": 0.00011025925424803193,
+      "ci_high": 0.00021044059559220533,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML + dead-zone 0.05",
+      "mean_utility_advantage": 2.2870494268213526e-05,
+      "se": 1.9384625529176284e-05,
+      "t_stat": 1.1798264678257815,
+      "ci_low": -1.5123371768971989e-05,
+      "ci_high": 6.086436030539904e-05,
+      "reference_better_95pct": false
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML cost-aware",
+      "mean_utility_advantage": 0.0007242669123789025,
+      "se": 2.3823840399381632e-05,
+      "t_stat": 30.400930338573854,
+      "ci_low": 0.0006775721851961145,
+      "ci_high": 0.0007709616395616904,
+      "reference_better_95pct": true
+    },
+    {
+      "reference": "DP optimal",
+      "vs": "ML cost-aware + dead-zone 0.01",
+      "mean_utility_advantage": 3.08618705018635e-05,
+      "se": 1.335972935620248e-05,
+      "t_stat": 2.3100670439506588,
+      "ci_low": 4.676800963706639e-06,
+      "ci_high": 5.704694004002036e-05,
+      "reference_better_95pct": true
+    }
+  ]
+}
